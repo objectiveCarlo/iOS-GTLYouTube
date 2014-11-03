@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 // Documentation:
 //   https://developers.google.com/blogger/docs/3.0/getting_started
 // Classes:
-//   GTLBloggerPage (0 custom class methods, 10 custom properties)
+//   GTLBloggerPage (0 custom class methods, 12 custom properties)
 //   GTLBloggerPageAuthor (0 custom class methods, 4 custom properties)
 //   GTLBloggerPageBlog (0 custom class methods, 1 custom properties)
 //   GTLBloggerPageAuthorImage (0 custom class methods, 1 custom properties)
@@ -57,9 +57,12 @@
 // The body content of this Page, in HTML.
 @property (copy) NSString *content;
 
+// Etag of the resource.
+@property (copy) NSString *ETag;
+
 // The identifier for this resource.
 // identifier property maps to 'id' in JSON (to avoid Objective C's 'id').
-@property (retain) NSNumber *identifier;  // longLongValue
+@property (copy) NSString *identifier;
 
 // The kind of this entity. Always blogger#page
 @property (copy) NSString *kind;
@@ -69,6 +72,9 @@
 
 // The API REST URL to fetch this resource from.
 @property (copy) NSString *selfLink;
+
+// The status of the page for admin resources (either LIVE or DRAFT).
+@property (copy) NSString *status;
 
 // The title of this entity. This is the name displayed in the Admin user
 // interface.
@@ -115,7 +121,7 @@
 
 // The identifier of the blog containing this page.
 // identifier property maps to 'id' in JSON (to avoid Objective C's 'id').
-@property (retain) NSNumber *identifier;  // longLongValue
+@property (copy) NSString *identifier;
 
 @end
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 // Documentation:
 //   https://developers.google.com/drive/
 // Classes:
-//   GTLDrivePermission (0 custom class methods, 12 custom properties)
+//   GTLDrivePermission (0 custom class methods, 14 custom properties)
 
 #if GTL_BUILT_AS_FRAMEWORK
   #import "GTL/GTLObject.h"
@@ -39,7 +39,7 @@
 //   GTLDrivePermission
 //
 
-// A single permission for a file.
+// A permission for a file.
 
 @interface GTLDrivePermission : GTLObject
 
@@ -49,10 +49,22 @@
 // The authkey parameter required for this permission.
 @property (copy) NSString *authKey;
 
+// The domain name of the entity this permission refers to. This is an
+// output-only field which is present when the permission type is user, group or
+// domain.
+@property (copy) NSString *domain;
+
+// The email address of the user this permission refers to. This is an
+// output-only field which is present when the permission type is user.
+@property (copy) NSString *emailAddress;
+
 // The ETag of the permission.
 @property (copy) NSString *ETag;
 
-// The ID of the permission.
+// The ID of the user this permission refers to, and identical to the
+// permissionId in the About and Files resources. When making a
+// drive.permissions.insert request, exactly one of the id or value fields must
+// be specified.
 // identifier property maps to 'id' in JSON (to avoid Objective C's 'id').
 @property (copy) NSString *identifier;
 
@@ -81,8 +93,9 @@
 // - anyone
 @property (copy) NSString *type;
 
-// The email address or domain name for the entity. This is not populated in
-// responses.
+// The email address or domain name for the entity. This is used during inserts
+// and is not populated in responses. When making a drive.permissions.insert
+// request, exactly one of the id or value fields must be specified.
 @property (copy) NSString *value;
 
 // Whether the link is required for this permission.

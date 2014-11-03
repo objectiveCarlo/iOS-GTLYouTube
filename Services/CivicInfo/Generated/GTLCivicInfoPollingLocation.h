@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@
 // ----------------------------------------------------------------------------
 // NOTE: This file is generated from Google APIs Discovery Service.
 // Service:
-//   Google Civic Information API (civicinfo/us_v1)
+//   Google Civic Information API (civicinfo/v2)
 // Description:
 //   An API for accessing civic information.
 // Documentation:
 //   https://developers.google.com/civic-information
 // Classes:
-//   GTLCivicInfoPollingLocation (0 custom class methods, 8 custom properties)
+//   GTLCivicInfoPollingLocation (0 custom class methods, 9 custom properties)
 
 #if GTL_BUILT_AS_FRAMEWORK
   #import "GTL/GTLObject.h"
@@ -42,23 +42,29 @@
 //   GTLCivicInfoPollingLocation
 //
 
-// A location where a voter can vote. This may be an early vote site or an
-// election day voting location.
+// A location where a voter can vote. This may be an early vote site, an
+// election day voting location, or a drop off location for a completed ballot.
 
 @interface GTLCivicInfoPollingLocation : GTLObject
 
-// The address of the location
+// The address of the location.
 @property (retain) GTLCivicInfoSimpleAddressType *address;
 
-// The last date that this early vote site may be used. This field is not
-// populated for polling locations.
+// The last date that this early vote site or drop off location may be used.
+// This field is not populated for polling locations.
 @property (copy) NSString *endDate;
 
-// The name of the early vote site. This field is not populated for polling
-// locations.
+// An ID for this object. IDs may change in future requests and should not be
+// cached. Access to this field requires special access that can be requested
+// from the Request more link on the Quotas page.
+// identifier property maps to 'id' in JSON (to avoid Objective C's 'id').
+@property (copy) NSString *identifier;
+
+// The name of the early vote site or drop off location. This field is not
+// populated for polling locations.
 @property (copy) NSString *name;
 
-// Notes about this location (e.g. accessibility ramp or entrance to use)
+// Notes about this location (e.g. accessibility ramp or entrance to use).
 @property (copy) NSString *notes;
 
 // A description of when this location is open.
@@ -68,12 +74,12 @@
 // has been aggregated from those sources.
 @property (retain) NSArray *sources;  // of GTLCivicInfoSource
 
-// The first date that this early vote site may be used. This field is not
-// populated for polling locations.
+// The first date that this early vote site or drop off location may be used.
+// This field is not populated for polling locations.
 @property (copy) NSString *startDate;
 
-// The services provided by this early vote site. This field is not populated
-// for polling locations.
+// The services provided by this early vote site or drop off location. This
+// field is not populated for polling locations.
 @property (copy) NSString *voterServices;
 
 @end

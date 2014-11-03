@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,22 +39,51 @@
   NSArray *classes = [NSArray arrayWithObjects:
                       [GTLQueryAnalytics class],
                       [GTLAnalyticsAccount class],
+                      [GTLAnalyticsAccountRef class],
                       [GTLAnalyticsAccounts class],
+                      [GTLAnalyticsAccountSummaries class],
+                      [GTLAnalyticsAccountSummary class],
+                      [GTLAnalyticsAccountTicket class],
+                      [GTLAnalyticsAdWordsAccount class],
+                      [GTLAnalyticsColumn class],
+                      [GTLAnalyticsColumns class],
                       [GTLAnalyticsCustomDataSource class],
                       [GTLAnalyticsCustomDataSources class],
                       [GTLAnalyticsDailyUpload class],
                       [GTLAnalyticsDailyUploadAppend class],
                       [GTLAnalyticsDailyUploads class],
+                      [GTLAnalyticsEntityAdWordsLink class],
+                      [GTLAnalyticsEntityAdWordsLinks class],
+                      [GTLAnalyticsEntityUserLink class],
+                      [GTLAnalyticsEntityUserLinks class],
+                      [GTLAnalyticsExperiment class],
+                      [GTLAnalyticsExperiments class],
+                      [GTLAnalyticsFilter class],
+                      [GTLAnalyticsFilterExpression class],
+                      [GTLAnalyticsFilterRef class],
+                      [GTLAnalyticsFilters class],
                       [GTLAnalyticsGaData class],
                       [GTLAnalyticsGoal class],
                       [GTLAnalyticsGoals class],
                       [GTLAnalyticsMcfData class],
                       [GTLAnalyticsProfile class],
+                      [GTLAnalyticsProfileFilterLink class],
+                      [GTLAnalyticsProfileFilterLinks class],
+                      [GTLAnalyticsProfileRef class],
                       [GTLAnalyticsProfiles class],
+                      [GTLAnalyticsProfileSummary class],
+                      [GTLAnalyticsRealtimeData class],
                       [GTLAnalyticsSegment class],
                       [GTLAnalyticsSegments class],
+                      [GTLAnalyticsUnsampledReport class],
+                      [GTLAnalyticsUnsampledReports class],
+                      [GTLAnalyticsUpload class],
+                      [GTLAnalyticsUploads class],
+                      [GTLAnalyticsUserRef class],
                       [GTLAnalyticsWebproperties class],
                       [GTLAnalyticsWebproperty class],
+                      [GTLAnalyticsWebPropertyRef class],
+                      [GTLAnalyticsWebPropertySummary class],
                       nil];
   return classes;
 }

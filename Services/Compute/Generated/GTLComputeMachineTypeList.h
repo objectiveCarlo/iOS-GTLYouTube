@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2013 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@
 // ----------------------------------------------------------------------------
 // NOTE: This file is generated from Google APIs Discovery Service.
 // Service:
-//   Compute Engine API (compute/v1beta13)
+//   Compute Engine API (compute/v1beta14)
 // Description:
 //   API for the Google Compute Engine service.
 // Documentation:
-//   https://developers.google.com/compute/docs/reference/v1beta13
+//   https://developers.google.com/compute/docs/reference/v1beta14
 // Classes:
 //   GTLComputeMachineTypeList (0 custom class methods, 5 custom properties)
 
@@ -41,6 +41,8 @@
 //   GTLComputeMachineTypeList
 //
 
+// Contains a list of machine type resources.
+
 // This class supports NSFastEnumeration over its "items" property. It also
 // supports -itemAtIndex: to retrieve individual objects from "items".
 
@@ -53,13 +55,13 @@
 // The machine type resources.
 @property (retain) NSArray *items;  // of GTLComputeMachineType
 
-// Type of resource.
+// Type of the resource.
 @property (copy) NSString *kind;
 
 // A token used to continue a truncated list request (output only).
 @property (copy) NSString *nextPageToken;
 
-// Server defined URL for this resource (output only).
+// Server defined URL for the resource (output only).
 @property (copy) NSString *selfLink;
 
 @end

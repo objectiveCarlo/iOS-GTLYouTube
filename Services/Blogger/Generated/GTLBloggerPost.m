@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,10 @@
 // Documentation:
 //   https://developers.google.com/blogger/docs/3.0/getting_started
 // Classes:
-//   GTLBloggerPost (0 custom class methods, 14 custom properties)
+//   GTLBloggerPost (0 custom class methods, 19 custom properties)
 //   GTLBloggerPostAuthor (0 custom class methods, 4 custom properties)
 //   GTLBloggerPostBlog (0 custom class methods, 1 custom properties)
+//   GTLBloggerPostImagesItem (0 custom class methods, 1 custom properties)
 //   GTLBloggerPostLocation (0 custom class methods, 4 custom properties)
 //   GTLBloggerPostReplies (0 custom class methods, 3 custom properties)
 //   GTLBloggerPostAuthorImage (0 custom class methods, 1 custom properties)
@@ -43,20 +44,25 @@
 //
 
 @implementation GTLBloggerPost
-@dynamic author, blog, content, customMetaData, identifier, kind, labels,
-         location, published, replies, selfLink, title, updated, url;
+@dynamic author, blog, content, customMetaData, ETag, identifier, images, kind,
+         labels, location, published, readerComments, replies, selfLink, status,
+         title, titleLink, updated, url;
 
 + (NSDictionary *)propertyToJSONKeyMap {
   NSDictionary *map =
-    [NSDictionary dictionaryWithObject:@"id"
-                                forKey:@"identifier"];
+    [NSDictionary dictionaryWithObjectsAndKeys:
+      @"etag", @"ETag",
+      @"id", @"identifier",
+      nil];
   return map;
 }
 
 + (NSDictionary *)arrayPropertyToClassMap {
   NSDictionary *map =
-    [NSDictionary dictionaryWithObject:[NSString class]
-                                forKey:@"labels"];
+    [NSDictionary dictionaryWithObjectsAndKeys:
+      [GTLBloggerPostImagesItem class], @"images",
+      [NSString class], @"labels",
+      nil];
   return map;
 }
 
@@ -100,6 +106,16 @@
   return map;
 }
 
+@end
+
+
+// ----------------------------------------------------------------------------
+//
+//   GTLBloggerPostImagesItem
+//
+
+@implementation GTLBloggerPostImagesItem
+@dynamic url;
 @end
 
 

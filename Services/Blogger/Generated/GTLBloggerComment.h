@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2013 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 // Documentation:
 //   https://developers.google.com/blogger/docs/3.0/getting_started
 // Classes:
-//   GTLBloggerComment (0 custom class methods, 10 custom properties)
+//   GTLBloggerComment (0 custom class methods, 11 custom properties)
 //   GTLBloggerCommentAuthor (0 custom class methods, 4 custom properties)
 //   GTLBloggerCommentBlog (0 custom class methods, 1 custom properties)
 //   GTLBloggerCommentInReplyTo (0 custom class methods, 1 custom properties)
@@ -63,7 +63,7 @@
 
 // The identifier for this resource.
 // identifier property maps to 'id' in JSON (to avoid Objective C's 'id').
-@property (retain) NSNumber *identifier;  // longLongValue
+@property (copy) NSString *identifier;
 
 // Data about the comment this is in reply to.
 @property (retain) GTLBloggerCommentInReplyTo *inReplyTo;
@@ -79,6 +79,9 @@
 
 // The API REST URL to fetch this resource from.
 @property (copy) NSString *selfLink;
+
+// The status of the comment (only populated for admin users)
+@property (copy) NSString *status;
 
 // RFC 3339 date-time when this comment was last updated.
 @property (retain) GTLDateTime *updated;
@@ -118,7 +121,7 @@
 
 // The identifier of the blog containing this comment.
 // identifier property maps to 'id' in JSON (to avoid Objective C's 'id').
-@property (retain) NSNumber *identifier;  // longLongValue
+@property (copy) NSString *identifier;
 
 @end
 
@@ -132,7 +135,7 @@
 
 // The identified of the parent of this comment.
 // identifier property maps to 'id' in JSON (to avoid Objective C's 'id').
-@property (retain) NSNumber *identifier;  // longLongValue
+@property (copy) NSString *identifier;
 
 @end
 
@@ -146,7 +149,7 @@
 
 // The identifier of the post containing this comment.
 // identifier property maps to 'id' in JSON (to avoid Objective C's 'id').
-@property (retain) NSNumber *identifier;  // longLongValue
+@property (copy) NSString *identifier;
 
 @end
 

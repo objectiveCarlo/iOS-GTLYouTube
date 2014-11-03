@@ -44,11 +44,8 @@
             urlQueryParameters = urlQueryParameters_,
             additionalHTTPHeaders = additionalHTTPHeaders_,
             expectedObjectClass = expectedObjectClass_,
-            shouldSkipAuthorization = skipAuthorization_;
-
-#if NS_BLOCKS_AVAILABLE
-@synthesize completionBlock = completionBlock_;
-#endif
+            shouldSkipAuthorization = skipAuthorization_,
+            completionBlock = completionBlock_;
 
 + (id)queryWithMethodName:(NSString *)methodName {
   return [[[self alloc] initWithMethodName:methodName] autorelease];
@@ -77,9 +74,7 @@
   [uploadParameters_ release];
   [urlQueryParameters_ release];
   [additionalHTTPHeaders_ release];
-#if NS_BLOCKS_AVAILABLE
   [completionBlock_ release];
-#endif
 
   [super dealloc];
 }
@@ -102,9 +97,7 @@
   query.additionalHTTPHeaders = self.additionalHTTPHeaders;
   query.expectedObjectClass = self.expectedObjectClass;
   query.shouldSkipAuthorization = self.shouldSkipAuthorization;
-#if NS_BLOCKS_AVAILABLE
   query.completionBlock = self.completionBlock;
-#endif
   return query;
 }
 
@@ -151,9 +144,7 @@
 }
 
 - (void)executionDidStop {
-#if NS_BLOCKS_AVAILABLE
   self.completionBlock = nil;
-#endif
 }
 
 + (NSString *)nextRequestID {
@@ -213,17 +204,17 @@
 
 #pragma mark Runtime Utilities
 
-static NSMutableDictionary *gParameterNameMapCache = nil;
-static NSMutableDictionary *gArrayPropertyToClassMapCache = nil;
+static NSMutableDictionary *gQueryParameterNameMapCache = nil;
+static NSMutableDictionary *gQueryArrayPropertyToClassMapCache = nil;
 
 + (void)initialize {
   // note that initialize is guaranteed by the runtime to be called in a
   // thread-safe manner
-  if (gParameterNameMapCache == nil) {
-    gParameterNameMapCache = [GTLUtilities newStaticDictionary];
+  if (gQueryParameterNameMapCache == nil) {
+    gQueryParameterNameMapCache = [GTLUtilities newStaticDictionary];
   }
-  if (gArrayPropertyToClassMapCache == nil) {
-    gArrayPropertyToClassMapCache = [GTLUtilities newStaticDictionary];
+  if (gQueryArrayPropertyToClassMapCache == nil) {
+    gQueryArrayPropertyToClassMapCache = [GTLUtilities newStaticDictionary];
   }
 }
 
@@ -232,7 +223,7 @@ static NSMutableDictionary *gArrayPropertyToClassMapCache = nil;
   [GTLUtilities mergedClassDictionaryForSelector:@selector(parameterNameMap)
                                       startClass:aClass
                                    ancestorClass:[GTLQuery class]
-                                           cache:gParameterNameMapCache];
+                                           cache:gQueryParameterNameMapCache];
   return resultMap;
 }
 
@@ -241,7 +232,7 @@ static NSMutableDictionary *gArrayPropertyToClassMapCache = nil;
     [GTLUtilities mergedClassDictionaryForSelector:@selector(arrayPropertyToClassMap)
                                         startClass:aClass
                                      ancestorClass:[GTLQuery class]
-                                             cache:gArrayPropertyToClassMapCache];
+                                             cache:gQueryArrayPropertyToClassMapCache];
   return resultMap;
 }
 
@@ -264,4 +255,8 @@ static NSMutableDictionary *gArrayPropertyToClassMapCache = nil;
   return [super resolveInstanceMethod:sel];
 }
 
+@end
+
+@implementation GTLQueryCollectionImpl
+@dynamic pageToken, startIndex;
 @end

@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@
 // ----------------------------------------------------------------------------
 // NOTE: This file is generated from Google APIs Discovery Service.
 // Service:
-//   Google Civic Information API (civicinfo/us_v1)
+//   Google Civic Information API (civicinfo/v2)
 // Description:
 //   An API for accessing civic information.
 // Documentation:
 //   https://developers.google.com/civic-information
 // Classes:
-//   GTLCivicInfoContest (0 custom class methods, 15 custom properties)
+//   GTLCivicInfoContest (0 custom class methods, 17 custom properties)
 
 #if GTL_BUILT_AS_FRAMEWORK
   #import "GTL/GTLObject.h"
@@ -60,9 +60,18 @@
 // contest.
 @property (copy) NSString *electorateSpecifications;
 
-// The level of office for this contest. One of: federal, state, county, city,
-// other
-@property (copy) NSString *level;
+// An ID for this object. IDs may change in future requests and should not be
+// cached. Access to this field requires special access that can be requested
+// from the Request more link on the Quotas page.
+// identifier property maps to 'id' in JSON (to avoid Objective C's 'id').
+@property (copy) NSString *identifier;
+
+// The levels of government of the office for this contest. There may be more
+// than one in cases where a jurisdiction effectively acts at two different
+// levels of government; for example, the mayor of the District of Columbia acts
+// at "locality" level, but also effectively at both "administrative-area-2" and
+// "administrative-area-1".
+@property (retain) NSArray *level;  // of NSString
 
 // The number of candidates that will be elected to office in this contest.
 @property (retain) NSNumber *numberElected;  // longLongValue
@@ -80,13 +89,16 @@
 // contests of type 'Referendum'.
 @property (copy) NSString *referendumSubtitle;
 
-// The title of the referendum. (e.g. 'Proposition 42') This field is only
+// The title of the referendum (e.g. 'Proposition 42'). This field is only
 // populated for contests of type 'Referendum'.
 @property (copy) NSString *referendumTitle;
 
-// A link the referendum. This field is only populated for contests of type
+// A link to the referendum. This field is only populated for contests of type
 // 'Referendum'.
 @property (copy) NSString *referendumUrl;
+
+// The roles which this office fulfills.
+@property (retain) NSArray *roles;  // of NSString
 
 // A list of sources for this contest. If multiple sources are listed, the data
 // has been aggregated from those sources.

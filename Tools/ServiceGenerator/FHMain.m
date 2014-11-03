@@ -207,22 +207,18 @@ static BOOL HaveFileStringsChanged(NSString *oldFile, NSString *newFile) {
   }
 
   // TODO: When moving to Lion, use NSRegularExpression to do this better.
-  NSLocale *enUSLocale =
-    [[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"] autorelease];
-  NSDateFormatter *formatter =
-    [[[NSDateFormatter alloc] initWithDateFormat:@"%Y"
-                            allowNaturalLanguage:NO] autorelease];
+  NSLocale *enUSLocale = [[[NSLocale alloc] initWithLocaleIdentifier:@"en_US"] autorelease];
+  NSDateFormatter *formatter = [[[NSDateFormatter alloc] init] autorelease];
+  [formatter setDateFormat:@"yyyy"];
   [formatter setLocale:enUSLocale];
   NSString *yearStr = [formatter stringFromDate:[NSDate date]];
 
-  NSString *matchLine =
-    [NSString stringWithFormat:@"Copyright (c) %@ Google Inc.", yearStr];
+  NSString *matchLine = [NSString stringWithFormat:@"Copyright (c) %@ Google Inc.", yearStr];
   NSString *newTest = [newFile stringByReplacingOccurrencesOfString:matchLine
                                                          withString:@""];
 
   for (int aYear = 2010; aYear < 2020; ++aYear) {
-    matchLine =
-      [NSString stringWithFormat:@"Copyright (c) %d Google Inc.", aYear];
+    matchLine = [NSString stringWithFormat:@"Copyright (c) %d Google Inc.", aYear];
     NSString *oldTest = [oldFile stringByReplacingOccurrencesOfString:matchLine
                                                            withString:@""];
     if ([oldTest isEqual:newTest]) {
@@ -388,7 +384,7 @@ static BOOL HaveFileStringsChanged(NSString *oldFile, NSString *newFile) {
   GTMHTTPFetcherService *fetcherService = self.discoveryService.fetcherService;
   GTMHTTPFetcher *fetcher = [fetcherService fetcherWithURL:url];
   fetcher.comment = [@"Fetching: " stringByAppendingString:reportingName];
-
+  fetcher.allowLocalhostRequest = YES;
   BOOL started = [fetcher beginFetchWithCompletionHandler:^(NSData *data, NSError *error) {
     self.numberOfActiveNetworkActions -= 1;
 
@@ -425,6 +421,7 @@ static BOOL HaveFileStringsChanged(NSString *oldFile, NSString *newFile) {
       fprintf(stderr,
               "%s The api description doesn't appear to be a discovery rpc description\n",
               kERROR);
+      self.status = 5;
       self.state = FHMain_Done;
       return;
     }
@@ -436,6 +433,7 @@ static BOOL HaveFileStringsChanged(NSString *oldFile, NSString *newFile) {
     self.numberOfActiveNetworkActions += 1;
   } else {
     fprintf(stderr, "%s Failed to fetch the api description\n", kERROR);
+    self.status = 6;
     self.state = FHMain_Done;
     return NO;
   }
@@ -497,6 +495,7 @@ static BOOL HaveFileStringsChanged(NSString *oldFile, NSString *newFile) {
         NSString *value = [asString substringFromIndex:range.location + 1];
         [self.formattedNames setObject:value forKey:key];
       }
+        break;
       case 'w': {
         NSString *asString = [NSString stringWithUTF8String:optarg];
         NSRange range = [asString rangeOfString:@":"];
@@ -922,7 +921,7 @@ static BOOL HaveFileStringsChanged(NSString *oldFile, NSString *newFile) {
   // Set the state to next be write files. This way, an error below will clear
   // the state.
   self.state = FHMain_WriteFiles;
-  
+
   // Stable order for compares.
   NSArray *orderedAPIs =
     [self.collectedApis sortedArrayUsingComparator:
@@ -1019,7 +1018,7 @@ static BOOL HaveFileStringsChanged(NSString *oldFile, NSString *newFile) {
   NSArray *allKeys = [self.generatedData allKeys];
   NSArray *sortedKeys =
     [allKeys sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
-  
+
   for (NSString *dirName in sortedKeys) {
     NSDictionary *filesDict = [self.generatedData objectForKey:dirName];
 

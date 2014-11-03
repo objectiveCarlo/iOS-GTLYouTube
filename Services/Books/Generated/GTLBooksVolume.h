@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,20 +26,29 @@
 // Documentation:
 //   https://developers.google.com/books/docs/v1/getting_started
 // Classes:
-//   GTLBooksVolume (0 custom class methods, 10 custom properties)
-//   GTLBooksVolumeAccessInfo (0 custom class methods, 11 custom properties)
+//   GTLBooksVolume (0 custom class methods, 11 custom properties)
+//   GTLBooksVolumeAccessInfo (0 custom class methods, 14 custom properties)
+//   GTLBooksVolumeLayerInfo (0 custom class methods, 1 custom properties)
 //   GTLBooksVolumeRecommendedInfo (0 custom class methods, 1 custom properties)
-//   GTLBooksVolumeSaleInfo (0 custom class methods, 7 custom properties)
+//   GTLBooksVolumeSaleInfo (0 custom class methods, 8 custom properties)
 //   GTLBooksVolumeSearchInfo (0 custom class methods, 1 custom properties)
-//   GTLBooksVolumeUserInfo (0 custom class methods, 6 custom properties)
-//   GTLBooksVolumeVolumeInfo (0 custom class methods, 20 custom properties)
+//   GTLBooksVolumeUserInfo (0 custom class methods, 11 custom properties)
+//   GTLBooksVolumeVolumeInfo (0 custom class methods, 22 custom properties)
 //   GTLBooksVolumeAccessInfoEpub (0 custom class methods, 3 custom properties)
 //   GTLBooksVolumeAccessInfoPdf (0 custom class methods, 3 custom properties)
+//   GTLBooksVolumeLayerInfoLayersItem (0 custom class methods, 2 custom properties)
 //   GTLBooksVolumeSaleInfoListPrice (0 custom class methods, 2 custom properties)
+//   GTLBooksVolumeSaleInfoOffersItem (0 custom class methods, 4 custom properties)
 //   GTLBooksVolumeSaleInfoRetailPrice (0 custom class methods, 2 custom properties)
+//   GTLBooksVolumeUserInfoCopy (0 custom class methods, 4 custom properties)
+//   GTLBooksVolumeUserInfoRentalPeriod (0 custom class methods, 2 custom properties)
+//   GTLBooksVolumeUserInfoUserUploadedVolumeInfo (0 custom class methods, 1 custom properties)
 //   GTLBooksVolumeVolumeInfoDimensions (0 custom class methods, 3 custom properties)
 //   GTLBooksVolumeVolumeInfoImageLinks (0 custom class methods, 6 custom properties)
 //   GTLBooksVolumeVolumeInfoIndustryIdentifiersItem (0 custom class methods, 2 custom properties)
+//   GTLBooksVolumeSaleInfoOffersItemListPrice (0 custom class methods, 2 custom properties)
+//   GTLBooksVolumeSaleInfoOffersItemRentalDuration (0 custom class methods, 2 custom properties)
+//   GTLBooksVolumeSaleInfoOffersItemRetailPrice (0 custom class methods, 2 custom properties)
 
 #if GTL_BUILT_AS_FRAMEWORK
   #import "GTL/GTLObject.h"
@@ -53,12 +62,21 @@
 @class GTLBooksVolumeAccessInfo;
 @class GTLBooksVolumeAccessInfoEpub;
 @class GTLBooksVolumeAccessInfoPdf;
+@class GTLBooksVolumeLayerInfo;
+@class GTLBooksVolumeLayerInfoLayersItem;
 @class GTLBooksVolumeRecommendedInfo;
 @class GTLBooksVolumeSaleInfo;
 @class GTLBooksVolumeSaleInfoListPrice;
+@class GTLBooksVolumeSaleInfoOffersItem;
+@class GTLBooksVolumeSaleInfoOffersItemListPrice;
+@class GTLBooksVolumeSaleInfoOffersItemRentalDuration;
+@class GTLBooksVolumeSaleInfoOffersItemRetailPrice;
 @class GTLBooksVolumeSaleInfoRetailPrice;
 @class GTLBooksVolumeSearchInfo;
 @class GTLBooksVolumeUserInfo;
+@class GTLBooksVolumeUserInfoCopy;
+@class GTLBooksVolumeUserInfoRentalPeriod;
+@class GTLBooksVolumeUserInfoUserUploadedVolumeInfo;
 @class GTLBooksVolumeVolumeInfo;
 @class GTLBooksVolumeVolumeInfoDimensions;
 @class GTLBooksVolumeVolumeInfoImageLinks;
@@ -86,6 +104,9 @@
 
 // Resource type for a volume. (In LITE projection.)
 @property (copy) NSString *kind;
+
+// What layers exist in this volume and high level information about them.
+@property (retain) GTLBooksVolumeLayerInfo *layerInfo;
 
 // Recommendation related information for this volume.
 @property (retain) GTLBooksVolumeRecommendedInfo *recommendedInfo;
@@ -130,6 +151,10 @@
 // Information about a volume's download license access restrictions.
 @property (retain) GTLBooksDownloadAccessRestriction *downloadAccess;
 
+// URL to the Google Drive viewer if this volume is uploaded by the user by
+// selecting the file from Google Drive.
+@property (copy) NSString *driveImportedContentLink;
+
 // Whether this volume can be embedded in a viewport using the Embedded Viewer
 // API.
 @property (retain) NSNumber *embeddable;  // boolValue
@@ -137,11 +162,19 @@
 // Information about epub content. (In LITE projection.)
 @property (retain) GTLBooksVolumeAccessInfoEpub *epub;
 
+// Whether this volume requires that the client explicitly request offline
+// download license rather than have it done automatically when loading the
+// content, if the client supports it.
+@property (retain) NSNumber *explicitOfflineLicenseManagement;  // boolValue
+
 // Information about pdf content. (In LITE projection.)
 @property (retain) GTLBooksVolumeAccessInfoPdf *pdf;
 
 // Whether or not this book is public domain in the country listed above.
 @property (retain) NSNumber *publicDomain;  // boolValue
+
+// Whether quote sharing is allowed for this volume.
+@property (retain) NSNumber *quoteSharingAllowed;  // boolValue
 
 // Whether text-to-speech is permitted for this volume. Values can be ALLOWED,
 // ALLOWED_FOR_ACCESSIBILITY, or NOT_ALLOWED.
@@ -161,6 +194,19 @@
 // URL to read this volume on the Google Books site. Link will not allow users
 // to read non-viewable volumes.
 @property (copy) NSString *webReaderLink;
+
+@end
+
+
+// ----------------------------------------------------------------------------
+//
+//   GTLBooksVolumeLayerInfo
+//
+
+@interface GTLBooksVolumeLayerInfo : GTLObject
+
+// A layer should appear here if and only if the layer exists for this book.
+@property (retain) NSArray *layers;  // of GTLBooksVolumeLayerInfoLayersItem
 
 @end
 
@@ -198,6 +244,9 @@
 // Suggested retail price. (In LITE projection.)
 @property (retain) GTLBooksVolumeSaleInfoListPrice *listPrice;
 
+// Offers available for this volume (sales and rentals).
+@property (retain) NSArray *offers;  // of GTLBooksVolumeSaleInfoOffersItem
+
 // The date on which this book is available for sale.
 @property (retain) GTLDateTime *onSaleDate;
 
@@ -208,7 +257,7 @@
 
 // Whether or not this book is available for sale or offered for free in the
 // Google eBookstore for the country listed above. Possible values are FOR_SALE,
-// FREE, NOT_FOR_SALE, or FOR_PREORDER.
+// FOR_RENTAL_ONLY, FOR_SALE_AND_RENTAL, FREE, NOT_FOR_SALE, or FOR_PREORDER.
 @property (copy) NSString *saleability;
 
 @end
@@ -234,6 +283,10 @@
 
 @interface GTLBooksVolumeUserInfo : GTLObject
 
+// Copy/Paste accounting information.
+// Remapped to 'copyProperty' to avoid NSObject's 'copy'.
+@property (retain) GTLBooksVolumeUserInfoCopy *copyProperty NS_RETURNS_NOT_RETAINED;
+
 // Whether or not this volume is currently in "my books."
 @property (retain) NSNumber *isInMyBooks;  // boolValue
 
@@ -245,9 +298,18 @@
 // request. (In LITE projection.)
 @property (retain) NSNumber *isPurchased;  // boolValue
 
+// Whether or not this volume was user uploaded.
+@property (retain) NSNumber *isUploaded;  // boolValue
+
 // The user's current reading position in the volume, if one is available. (In
 // LITE projection.)
 @property (retain) GTLBooksReadingPosition *readingPosition;
+
+// Period during this book is/was a valid rental.
+@property (retain) GTLBooksVolumeUserInfoRentalPeriod *rentalPeriod;
+
+// Whether this book is an active or an expired rental.
+@property (copy) NSString *rentalState;
 
 // This user's review of this volume, if one exists.
 @property (retain) GTLBooksReview *review;
@@ -257,6 +319,7 @@
 // date-time format).
 @property (retain) GTLDateTime *updated;
 
+@property (retain) GTLBooksVolumeUserInfoUserUploadedVolumeInfo *userUploadedVolumeInfo;
 @end
 
 
@@ -311,11 +374,14 @@
 // the categories list returned below that has the highest weight.
 @property (copy) NSString *mainCategory;
 
-// Total number of pages.
+// Total number of pages as per publisher metadata.
 @property (retain) NSNumber *pageCount;  // intValue
 
 // URL to preview this volume on the Google Books site.
 @property (copy) NSString *previewLink;
+
+// Total number of printed pages in generated pdf representation.
+@property (retain) NSNumber *printedPageCount;  // intValue
 
 // Type of publication of this volume. Possible values are BOOK or MAGAZINE.
 @property (copy) NSString *printType;
@@ -328,6 +394,9 @@
 
 // The number of review ratings for this volume.
 @property (retain) NSNumber *ratingsCount;  // intValue
+
+// The reading modes available for this volume.
+@property (retain) id readingModes;
 
 // Volume subtitle. (In LITE projection.)
 @property (copy) NSString *subtitle;
@@ -380,6 +449,24 @@
 
 // ----------------------------------------------------------------------------
 //
+//   GTLBooksVolumeLayerInfoLayersItem
+//
+
+@interface GTLBooksVolumeLayerInfoLayersItem : GTLObject
+
+// The layer id of this layer (e.g. "geo").
+@property (copy) NSString *layerId;
+
+// The current version of this layer's volume annotations. Note that this
+// version applies only to the data in the books.layers.volumeAnnotations.*
+// responses. The actual annotation data is versioned separately.
+@property (copy) NSString *volumeAnnotationsVersion;
+
+@end
+
+
+// ----------------------------------------------------------------------------
+//
 //   GTLBooksVolumeSaleInfoListPrice
 //
 
@@ -390,6 +477,28 @@
 
 // An ISO 4217, three-letter currency code. (In LITE projection.)
 @property (copy) NSString *currencyCode;
+
+@end
+
+
+// ----------------------------------------------------------------------------
+//
+//   GTLBooksVolumeSaleInfoOffersItem
+//
+
+@interface GTLBooksVolumeSaleInfoOffersItem : GTLObject
+
+// The finsky offer type (e.g., PURCHASE=0 RENTAL=3)
+@property (retain) NSNumber *finskyOfferType;  // intValue
+
+// Offer list (=undiscounted) price in Micros.
+@property (retain) GTLBooksVolumeSaleInfoOffersItemListPrice *listPrice;
+
+// The rental duration (for rental offers only).
+@property (retain) GTLBooksVolumeSaleInfoOffersItemRentalDuration *rentalDuration;
+
+// Offer retail (=discounted) price in Micros
+@property (retain) GTLBooksVolumeSaleInfoOffersItemRetailPrice *retailPrice;
 
 @end
 
@@ -407,6 +516,40 @@
 // An ISO 4217, three-letter currency code. (In LITE projection.)
 @property (copy) NSString *currencyCode;
 
+@end
+
+
+// ----------------------------------------------------------------------------
+//
+//   GTLBooksVolumeUserInfoCopy
+//
+
+@interface GTLBooksVolumeUserInfoCopy : GTLObject
+@property (retain) NSNumber *allowedCharacterCount;  // intValue
+@property (copy) NSString *limitType;
+@property (retain) NSNumber *remainingCharacterCount;  // intValue
+@property (retain) GTLDateTime *updated;
+@end
+
+
+// ----------------------------------------------------------------------------
+//
+//   GTLBooksVolumeUserInfoRentalPeriod
+//
+
+@interface GTLBooksVolumeUserInfoRentalPeriod : GTLObject
+@property (retain) NSNumber *endUtcSec;  // longLongValue
+@property (retain) NSNumber *startUtcSec;  // longLongValue
+@end
+
+
+// ----------------------------------------------------------------------------
+//
+//   GTLBooksVolumeUserInfoUserUploadedVolumeInfo
+//
+
+@interface GTLBooksVolumeUserInfoUserUploadedVolumeInfo : GTLObject
+@property (copy) NSString *processingState;
 @end
 
 
@@ -473,4 +616,37 @@
 // Identifier type. Possible values are ISBN_10, ISBN_13, ISSN and OTHER.
 @property (copy) NSString *type;
 
+@end
+
+
+// ----------------------------------------------------------------------------
+//
+//   GTLBooksVolumeSaleInfoOffersItemListPrice
+//
+
+@interface GTLBooksVolumeSaleInfoOffersItemListPrice : GTLObject
+@property (retain) NSNumber *amountInMicros;  // doubleValue
+@property (copy) NSString *currencyCode;
+@end
+
+
+// ----------------------------------------------------------------------------
+//
+//   GTLBooksVolumeSaleInfoOffersItemRentalDuration
+//
+
+@interface GTLBooksVolumeSaleInfoOffersItemRentalDuration : GTLObject
+@property (retain) NSNumber *count;  // doubleValue
+@property (copy) NSString *unit;
+@end
+
+
+// ----------------------------------------------------------------------------
+//
+//   GTLBooksVolumeSaleInfoOffersItemRetailPrice
+//
+
+@interface GTLBooksVolumeSaleInfoOffersItemRetailPrice : GTLObject
+@property (retain) NSNumber *amountInMicros;  // doubleValue
+@property (copy) NSString *currencyCode;
 @end

@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@
 // ----------------------------------------------------------------------------
 // NOTE: This file is generated from Google APIs Discovery Service.
 // Service:
-//   Google Civic Information API (civicinfo/us_v1)
+//   Google Civic Information API (civicinfo/v2)
 // Description:
 //   An API for accessing civic information.
 // Documentation:
 //   https://developers.google.com/civic-information
 // Classes:
-//   GTLCivicInfoContest (0 custom class methods, 15 custom properties)
+//   GTLCivicInfoContest (0 custom class methods, 17 custom properties)
 
 #import "GTLCivicInfoContest.h"
 
@@ -40,15 +40,24 @@
 //
 
 @implementation GTLCivicInfoContest
-@dynamic ballotPlacement, candidates, district, electorateSpecifications, level,
-         numberElected, numberVotingFor, office, primaryParty,
-         referendumSubtitle, referendumTitle, referendumUrl, sources, special,
-         type;
+@dynamic ballotPlacement, candidates, district, electorateSpecifications,
+         identifier, level, numberElected, numberVotingFor, office,
+         primaryParty, referendumSubtitle, referendumTitle, referendumUrl,
+         roles, sources, special, type;
+
++ (NSDictionary *)propertyToJSONKeyMap {
+  NSDictionary *map =
+    [NSDictionary dictionaryWithObject:@"id"
+                                forKey:@"identifier"];
+  return map;
+}
 
 + (NSDictionary *)arrayPropertyToClassMap {
   NSDictionary *map =
     [NSDictionary dictionaryWithObjectsAndKeys:
       [GTLCivicInfoCandidate class], @"candidates",
+      [NSString class], @"level",
+      [NSString class], @"roles",
       [GTLCivicInfoSource class], @"sources",
       nil];
   return map;

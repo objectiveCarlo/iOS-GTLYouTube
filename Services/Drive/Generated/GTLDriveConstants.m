@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,21 @@
 
 // Authorization scope
 NSString * const kGTLAuthScopeDrive                 = @"https://www.googleapis.com/auth/drive";
+NSString * const kGTLAuthScopeDriveAppdata          = @"https://www.googleapis.com/auth/drive.appdata";
 NSString * const kGTLAuthScopeDriveAppsReadonly     = @"https://www.googleapis.com/auth/drive.apps.readonly";
 NSString * const kGTLAuthScopeDriveFile             = @"https://www.googleapis.com/auth/drive.file";
 NSString * const kGTLAuthScopeDriveMetadataReadonly = @"https://www.googleapis.com/auth/drive.metadata.readonly";
 NSString * const kGTLAuthScopeDriveReadonly         = @"https://www.googleapis.com/auth/drive.readonly";
+NSString * const kGTLAuthScopeDriveScripts          = @"https://www.googleapis.com/auth/drive.scripts";
 
-// Projection
+// GTLQueryDrive - Corpus
+NSString * const kGTLDriveCorpusDefault = @"DEFAULT";
+NSString * const kGTLDriveCorpusDomain  = @"DOMAIN";
+
+// GTLQueryDrive - Projection
 NSString * const kGTLDriveProjectionBasic = @"BASIC";
 NSString * const kGTLDriveProjectionFull  = @"FULL";
+
+// GTLQueryDrive - Visibility
+NSString * const kGTLDriveVisibilityDefault = @"DEFAULT";
+NSString * const kGTLDriveVisibilityPrivate = @"PRIVATE";

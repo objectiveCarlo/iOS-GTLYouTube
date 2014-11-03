@@ -23,7 +23,36 @@
 #import <Foundation/Foundation.h>
 
 #import "GTLDefines.h"
-#import "GTMHTTPFetcherService.h"
+
+// Fetcher bridging macros -- Internal library use only.
+//
+// GTL_USE_SESSION_FETCHER should be set to force the GTL library to use
+// GTMSessionFetcher rather than the older GTMHTTPFetcher.  The session
+// fetcher requires iOS 7/OS X 10.9 and supports out-of-process uploads.
+
+#ifndef GTL_USE_SESSION_FETCHER
+  #if GTM_USE_SESSION_FETCHER
+    #define GTL_USE_SESSION_FETCHER 1
+  #else
+    #define GTL_USE_SESSION_FETCHER 0
+  #endif  // GTM_USE_SESSION_FETCHER
+#endif  // GTL_USE_SESSION_FETCHER
+
+#if GTL_USE_SESSION_FETCHER
+  #define GTLUploadFetcherClass GTMSessionUploadFetcher
+  #define GTLUploadFetcherClassStr @"GTMSessionUploadFetcher"
+
+  #import "GTMSessionFetcher.h"
+  #import "GTMSessionFetcherService.h"
+#else
+  // !GTL_USE_SESSION_FETCHER
+  #define GTLUploadFetcherClass GTMHTTPUploadFetcher
+  #define GTLUploadFetcherClassStr @"GTMHTTPUploadFetcher"
+
+  #import "GTMHTTPFetcher.h"
+  #import "GTMHTTPFetcherService.h"
+#endif  // GTL_USE_SESSION_FETCHER
+
 #import "GTLBatchQuery.h"
 #import "GTLBatchResult.h"
 #import "GTLDateTime.h"
@@ -34,64 +63,46 @@
 #import "GTLQuery.h"
 #import "GTLUtilities.h"
 
-#undef _EXTERN
-#undef _INITIALIZE_AS
-#ifdef GTLSERVICE_DEFINE_GLOBALS
-#define _EXTERN
-#define _INITIALIZE_AS(x) =x
-#else
-#define _EXTERN extern
-#define _INITIALIZE_AS(x)
-#endif
-
 // Error domains
-_EXTERN NSString* const kGTLServiceErrorDomain _INITIALIZE_AS(@"com.google.GTLServiceDomain");
+extern NSString *const kGTLServiceErrorDomain;
 enum {
   kGTLErrorQueryResultMissing = -3000,
   kGTLErrorWaitTimedOut       = -3001
 };
 
-_EXTERN NSString* const kGTLJSONRPCErrorDomain _INITIALIZE_AS(@"com.google.GTLJSONRPCErrorDomain");
+extern NSString *const kGTLJSONRPCErrorDomain;
 
 // We'll consistently store the server error string in the userInfo under
 // this key
-_EXTERN NSString* const kGTLServerErrorStringKey _INITIALIZE_AS(@"error");
+extern NSString *const kGTLServerErrorStringKey;
 
-_EXTERN Class const kGTLUseRegisteredClass _INITIALIZE_AS(nil);
+extern Class const kGTLUseRegisteredClass;
 
-_EXTERN NSUInteger const kGTLStandardUploadChunkSize _INITIALIZE_AS(NSUIntegerMax);
+extern NSUInteger const kGTLStandardUploadChunkSize;
 
 // When servers return us structured JSON errors, the NSError will
 // contain a GTLErrorObject in the userInfo dictionary under the key
 // kGTLStructuredErrorsKey
-_EXTERN NSString* const kGTLStructuredErrorKey _INITIALIZE_AS(@"GTLStructuredError");
+extern NSString *const kGTLStructuredErrorKey;
 
 // When specifying an ETag for updating or deleting a single entry, use
 // kGTLETagWildcard to tell the server to replace the current value
 // unconditionally.  Do not use this in entries in a batch feed.
-_EXTERN NSString* const kGTLETagWildcard _INITIALIZE_AS(@"*");
+extern NSString *const kGTLETagWildcard;
 
 // Notifications when parsing of a fetcher feed or entry begins or ends
-_EXTERN NSString* const kGTLServiceTicketParsingStartedNotification _INITIALIZE_AS(@"kGTLServiceTicketParsingStartedNotification");
-_EXTERN NSString* const kGTLServiceTicketParsingStoppedNotification _INITIALIZE_AS(@"kGTLServiceTicketParsingStoppedNotification");
+extern NSString *const kGTLServiceTicketParsingStartedNotification;
+extern NSString *const kGTLServiceTicketParsingStoppedNotification ;
 
 @class GTLServiceTicket;
 
 // Block types used for fetch callbacks
-//
-// These typedefs are not used in the header file method declarations
-// since it's more useful when code sense expansions show the argument
-// types rather than the typedefs
 
-#if NS_BLOCKS_AVAILABLE
 typedef void (^GTLServiceCompletionHandler)(GTLServiceTicket *ticket, id object, NSError *error);
 
 typedef void (^GTLServiceUploadProgressBlock)(GTLServiceTicket *ticket, unsigned long long numberOfBytesRead, unsigned long long dataLength);
-#else
-typedef void *GTLServiceCompletionHandler;
 
-typedef void *GTLServiceUploadProgressBlock;
-#endif // NS_BLOCKS_AVAILABLE
+typedef BOOL (^GTLServiceRetryBlock)(GTLServiceTicket *ticket, BOOL suggestedWillRetry, NSError *error);
 
 #pragma mark -
 
@@ -103,7 +114,7 @@ typedef void *GTLServiceUploadProgressBlock;
  @private
   NSOperationQueue *parseQueue_;
   NSString *userAgent_;
-  GTMHTTPFetcherService *fetcherService_;
+  GTMBridgeFetcherService *fetcherService_;
   NSString *userAgentAddition_;
 
   NSMutableDictionary *serviceProperties_; // initial values for properties in future tickets
@@ -112,17 +123,8 @@ typedef void *GTLServiceUploadProgressBlock;
 
   SEL uploadProgressSelector_; // optional
 
-#if NS_BLOCKS_AVAILABLE
-  BOOL (^retryBlock_)(GTLServiceTicket *, BOOL, NSError *);
-  void (^uploadProgressBlock_)(GTLServiceTicket *ticket,
-                               unsigned long long numberOfBytesRead,
-                               unsigned long long dataLength);
-#elif !__LP64__
-  // Placeholders: for 32-bit builds, keep the size of the object's ivar section
-  // the same with and without blocks
-  id retryPlaceholder_;
-  id uploadProgressPlaceholder_;
-#endif
+  GTLServiceRetryBlock retryBlock_;
+  GTLServiceUploadProgressBlock uploadProgressBlock_;
 
   NSUInteger uploadChunkSize_;      // zero when uploading via multi-part MIME http body
 
@@ -131,6 +133,8 @@ typedef void *GTLServiceUploadProgressBlock;
   NSTimeInterval maxRetryInterval_; // default to 600. seconds
 
   BOOL shouldFetchNextPages_;
+
+  BOOL allowInsecureQueries_;
 
   NSString *apiKey_;
   BOOL isRESTDataWrapperRequired_;
@@ -160,12 +164,10 @@ typedef void *GTLServiceUploadProgressBlock;
 
 - (GTLServiceTicket *)executeQuery:(id<GTLQueryProtocol>)query
                           delegate:(id)delegate
-                 didFinishSelector:(SEL)finishedSelector;
+                 didFinishSelector:(SEL)finishedSelector GTL_NONNULL((1));
 
-#if NS_BLOCKS_AVAILABLE
 - (GTLServiceTicket *)executeQuery:(id<GTLQueryProtocol>)query
-                 completionHandler:(void (^)(GTLServiceTicket *ticket, id object, NSError *error))handler;
-#endif
+                 completionHandler:(GTLServiceCompletionHandler)handler GTL_NONNULL((1));
 
 // Automatic page fetches
 //
@@ -206,13 +208,11 @@ typedef void *GTLServiceUploadProgressBlock;
 //
 // If present, it should have the signature:
 //   -(BOOL)ticket:(GTLServiceTicket *)ticket willRetry:(BOOL)suggestedWillRetry forError:(NSError *)error
-// and return YES to cause a retry.  Note that unlike the GTMHTTPFetcher retry
+// and return YES to cause a retry.  Note that unlike the fetcher retry
 // selector, this selector's first argument is a ticket, not a fetcher.
 
 @property (nonatomic, assign) SEL retrySelector;
-#if NS_BLOCKS_AVAILABLE
-@property (copy) BOOL (^retryBlock)(GTLServiceTicket *ticket, BOOL suggestedWillRetry, NSError *error);
-#endif
+@property (copy) GTLServiceRetryBlock retryBlock;
 
 @property (nonatomic, assign) NSTimeInterval maxRetryInterval;
 
@@ -231,86 +231,82 @@ typedef void *GTLServiceUploadProgressBlock;
                                       parameters:(NSDictionary *)parameters
                                      objectClass:(Class)objectClass
                                         delegate:(id)delegate
-                               didFinishSelector:(SEL)finishedSelector;
+                               didFinishSelector:(SEL)finishedSelector GTL_NONNULL((1));
 
 - (GTLServiceTicket *)fetchObjectWithMethodNamed:(NSString *)methodName
                                  insertingObject:(GTLObject *)bodyObject
                                      objectClass:(Class)objectClass
                                         delegate:(id)delegate
-                               didFinishSelector:(SEL)finishedSelector;
+                               didFinishSelector:(SEL)finishedSelector GTL_NONNULL((1));
 
 - (GTLServiceTicket *)fetchObjectWithMethodNamed:(NSString *)methodName
                                       parameters:(NSDictionary *)parameters
                                  insertingObject:(GTLObject *)bodyObject
                                      objectClass:(Class)objectClass
                                         delegate:(id)delegate
-                               didFinishSelector:(SEL)finishedSelector;
+                               didFinishSelector:(SEL)finishedSelector GTL_NONNULL((1));
 
-#if NS_BLOCKS_AVAILABLE
 - (GTLServiceTicket *)fetchObjectWithMethodNamed:(NSString *)methodName
                                       parameters:(NSDictionary *)parameters
                                      objectClass:(Class)objectClass
-                               completionHandler:(void (^)(GTLServiceTicket *ticket, id object, NSError *error))handler;
+                               completionHandler:(GTLServiceCompletionHandler)handler GTL_NONNULL((1));
 
 - (GTLServiceTicket *)fetchObjectWithMethodNamed:(NSString *)methodName
                                  insertingObject:(GTLObject *)bodyObject
                                      objectClass:(Class)objectClass
-                               completionHandler:(void (^)(GTLServiceTicket *ticket, id object, NSError *error))handler;
+                               completionHandler:(GTLServiceCompletionHandler)handler GTL_NONNULL((1));
 
 - (GTLServiceTicket *)fetchObjectWithMethodNamed:(NSString *)methodName
                                       parameters:(NSDictionary *)parameters
                                  insertingObject:(GTLObject *)bodyObject
                                      objectClass:(Class)objectClass
-                               completionHandler:(void (^)(GTLServiceTicket *ticket, id object, NSError *error))handler;
-#endif
+                               completionHandler:(GTLServiceCompletionHandler)handler GTL_NONNULL((1));
 
 #pragma mark REST Fetch Methods
 
 - (GTLServiceTicket *)fetchObjectWithURL:(NSURL *)objectURL
                                 delegate:(id)delegate
-                       didFinishSelector:(SEL)finishedSelector;
+                       didFinishSelector:(SEL)finishedSelector GTL_NONNULL((1));
 
 - (GTLServiceTicket *)fetchObjectWithURL:(NSURL *)objectURL
                              objectClass:(Class)objectClass
                                 delegate:(id)delegate
-                       didFinishSelector:(SEL)finishedSelector;
+                       didFinishSelector:(SEL)finishedSelector GTL_NONNULL((1));
 
 - (GTLServiceTicket *)fetchPublicObjectWithURL:(NSURL *)objectURL
                                    objectClass:(Class)objectClass
                                       delegate:(id)delegate
-                             didFinishSelector:(SEL)finishedSelector;
+                             didFinishSelector:(SEL)finishedSelector GTL_NONNULL((1));
 
 - (GTLServiceTicket *)fetchObjectByInsertingObject:(GTLObject *)bodyToPut
                                             forURL:(NSURL *)destinationURL
                                           delegate:(id)delegate
-                                 didFinishSelector:(SEL)finishedSelector;
+                                 didFinishSelector:(SEL)finishedSelector GTL_NONNULL((1,2));
 
 - (GTLServiceTicket *)fetchObjectByUpdatingObject:(GTLObject *)bodyToPut
                                            forURL:(NSURL *)destinationURL
                                          delegate:(id)delegate
-                                didFinishSelector:(SEL)finishedSelector;
+                                didFinishSelector:(SEL)finishedSelector GTL_NONNULL((1,2));
 
 - (GTLServiceTicket *)deleteResourceURL:(NSURL *)destinationURL
                                    ETag:(NSString *)etagOrNil
                                delegate:(id)delegate
-                      didFinishSelector:(SEL)finishedSelector;
+                      didFinishSelector:(SEL)finishedSelector GTL_NONNULL((1));
 
-#if NS_BLOCKS_AVAILABLE
 - (GTLServiceTicket *)fetchObjectWithURL:(NSURL *)objectURL
-                       completionHandler:(void (^)(GTLServiceTicket *ticket, id object, NSError *error))handler;
+                       completionHandler:(GTLServiceCompletionHandler)handler GTL_NONNULL((1));
 
 - (GTLServiceTicket *)fetchObjectByInsertingObject:(GTLObject *)bodyToPut
                                             forURL:(NSURL *)destinationURL
-                                 completionHandler:(void (^)(GTLServiceTicket *ticket, id object, NSError *error))handler;
+                                 completionHandler:(GTLServiceCompletionHandler)handler GTL_NONNULL((1));
 
 - (GTLServiceTicket *)fetchObjectByUpdatingObject:(GTLObject *)bodyToPut
                                            forURL:(NSURL *)destinationURL
-                                completionHandler:(void (^)(GTLServiceTicket *ticket, id object, NSError *error))handler;
+                                completionHandler:(GTLServiceCompletionHandler)handler GTL_NONNULL((1));
 
 - (GTLServiceTicket *)deleteResourceURL:(NSURL *)destinationURL
                                    ETag:(NSString *)etagOrNil
-                      completionHandler:(void (^)(GTLServiceTicket *ticket, id object, NSError *error))handler;
-#endif
+                      completionHandler:(GTLServiceCompletionHandler)handler GTL_NONNULL((1));
 
 #pragma mark User Properties
 
@@ -320,8 +316,8 @@ typedef void *GTLServiceUploadProgressBlock;
 //
 // The service properties dictionary is copied to become the initial property
 // dictionary for each ticket.
-- (void)setServiceProperty:(id)obj forKey:(NSString *)key; // pass nil obj to remove property
-- (id)servicePropertyForKey:(NSString *)key;
+- (void)setServiceProperty:(id)obj forKey:(NSString *)key GTL_NONNULL((2)); // pass nil obj to remove property
+- (id)servicePropertyForKey:(NSString *)key GTL_NONNULL((1));
 
 @property (nonatomic, copy) NSDictionary *serviceProperties;
 
@@ -372,6 +368,13 @@ typedef void *GTLServiceUploadProgressBlock;
 // NSModalPanelRunLoopMode as one of the modes.
 @property (nonatomic, retain) NSArray *runLoopModes;
 
+// Normally, API requests must be made only via SSL to protect the user's
+// data and the authentication token.  This property allows the application
+// to make non-SSL requests and localhost requests for testing.
+//
+// Defaults to NO.
+@property (nonatomic, assign) BOOL allowInsecureQueries;
+
 // Applications needing an additional identifier in the server logs may specify
 // one.
 @property (nonatomic, copy) NSString *userAgentAddition;
@@ -391,7 +394,7 @@ typedef void *GTLServiceUploadProgressBlock;
 // For http method, pass nil (for default GET method), POST, PUT, or DELETE
 - (NSMutableURLRequest *)requestForURL:(NSURL *)url
                                   ETag:(NSString *)etagOrNil
-                            httpMethod:(NSString *)httpMethodOrNil;
+                            httpMethod:(NSString *)httpMethodOrNil GTL_NONNULL((1));
 
 // objectRequestForURL returns an NSMutableURLRequest for a JSON GTL object
 //
@@ -403,22 +406,24 @@ typedef void *GTLServiceUploadProgressBlock;
                                   httpMethod:(NSString *)httpMethod
                                       isREST:(BOOL)isREST
                            additionalHeaders:(NSDictionary *)additionalHeaders
-                                      ticket:(GTLServiceTicket *)ticket;
+                                      ticket:(GTLServiceTicket *)ticket GTL_NONNULL((1));
 
 // The queue used for parsing JSON responses (previously this property
 // was called operationQueue)
 @property (nonatomic, retain) NSOperationQueue *parseQueue;
 
-// The fetcher service object issues the GTMHTTPFetcher instances
+// The fetcher service object issues the fetcher instances
 // for this API service
-@property (nonatomic, retain) GTMHTTPFetcherService *fetcherService;
+@property (nonatomic, retain) GTMBridgeFetcherService *fetcherService;
 
 // Default storage for cookies is in the service object's fetchHistory.
 //
 // Apps that want to share cookies between all standalone fetchers and the
 // service object may specify static application-wide cookie storage,
 // kGTMHTTPFetcherCookieStorageMethodStatic.
+#if !GTL_USE_SESSION_FETCHER
 @property (nonatomic, assign) NSInteger cookieStorageMethod;
+#endif
 
 // When sending REST style queries, should the payload be wrapped in a "data"
 // element, and will the reply be wrapped in an "data" element.
@@ -459,9 +464,7 @@ typedef void *GTLServiceUploadProgressBlock;
 //        ofTotalByteCount:(unsigned long long)dataLength;
 @property (nonatomic, assign) SEL uploadProgressSelector;
 
-#if NS_BLOCKS_AVAILABLE
-@property (copy) void (^uploadProgressBlock)(GTLServiceTicket *ticket, unsigned long long numberOfBytesRead, unsigned long long dataLength);
-#endif
+@property (copy) GTLServiceUploadProgressBlock uploadProgressBlock;
 
 // Wait synchronously for fetch to complete (strongly discouraged)
 //
@@ -479,7 +482,7 @@ typedef void *GTLServiceUploadProgressBlock;
 - (BOOL)waitForTicket:(GTLServiceTicket *)ticket
               timeout:(NSTimeInterval)timeoutInSeconds
         fetchedObject:(GTLObject **)outObjectOrNil
-                error:(NSError **)outErrorOrNil;
+                error:(NSError **)outErrorOrNil GTL_NONNULL((1));
 @end
 
 #pragma mark -
@@ -493,24 +496,15 @@ typedef void *GTLServiceUploadProgressBlock;
   NSMutableDictionary *ticketProperties_;
   NSDictionary *surrogates_;
 
-  GTMHTTPFetcher *objectFetcher_;
+  GTMBridgeFetcher *objectFetcher_;
   SEL uploadProgressSelector_;
   BOOL shouldFetchNextPages_;
   BOOL isRetryEnabled_;
   SEL retrySelector_;
   NSTimeInterval maxRetryInterval_;
 
-#if NS_BLOCKS_AVAILABLE
-  BOOL (^retryBlock_)(GTLServiceTicket *, BOOL, NSError *);
-  void (^uploadProgressBlock_)(GTLServiceTicket *ticket,
-                               unsigned long long numberOfBytesRead,
-                               unsigned long long dataLength);
-#elif !__LP64__
-  // Placeholders: for 32-bit builds, keep the size of the object's ivar section
-  // the same with and without blocks
-  id retryPlaceholder_;
-  id uploadProgressPlaceholder_;
-#endif
+  GTLServiceRetryBlock retryBlock_;
+  GTLServiceUploadProgressBlock uploadProgressBlock_;
 
   GTLObject *postedObject_;
   GTLObject *fetchedObject_;
@@ -543,7 +537,7 @@ typedef void *GTLServiceUploadProgressBlock;
 - (void)resumeUpload;
 - (BOOL)isUploadPaused;
 
-@property (nonatomic, retain) GTMHTTPFetcher *objectFetcher;
+@property (nonatomic, retain) GTMBridgeFetcher *objectFetcher;
 @property (nonatomic, assign) SEL uploadProgressSelector;
 
 // Services which do not require an user authorization may require a developer
@@ -555,7 +549,7 @@ typedef void *GTLServiceUploadProgressBlock;
 // Properties and userData are supported for client convenience.
 //
 // Property keys beginning with _ are reserved by the library.
-- (void)setProperty:(id)obj forKey:(NSString *)key; // pass nil obj to remove property
+- (void)setProperty:(id)obj forKey:(NSString *)key GTL_NONNULL((1)); // pass nil obj to remove property
 - (id)propertyForKey:(NSString *)key;
 
 @property (nonatomic, copy) NSDictionary *properties;
@@ -567,7 +561,7 @@ typedef void *GTLServiceUploadProgressBlock;
 @property (nonatomic, retain) GTLObject *fetchedObject;
 @property (nonatomic, retain) id<GTLQueryProtocol> executingQuery; // Query currently being fetched by this ticket
 @property (nonatomic, retain) id<GTLQueryProtocol> originalQuery;  // Query used to create this ticket
-- (GTLQuery *)queryForRequestID:(NSString *)requestID; // Returns the query from within the batch with the given id.
+- (GTLQuery *)queryForRequestID:(NSString *)requestID GTL_NONNULL((1)); // Returns the query from within the batch with the given id.
 
 @property (nonatomic, retain) NSDictionary *surrogates;
 
@@ -575,9 +569,7 @@ typedef void *GTLServiceUploadProgressBlock;
 
 @property (nonatomic, assign, getter=isRetryEnabled) BOOL retryEnabled;
 @property (nonatomic, assign) SEL retrySelector;
-#if NS_BLOCKS_AVAILABLE
-@property (copy) BOOL (^retryBlock)(GTLServiceTicket *ticket, BOOL suggestedWillRetry, NSError *error);
-#endif
+@property (copy) GTLServiceRetryBlock retryBlock;
 @property (nonatomic, assign) NSTimeInterval maxRetryInterval;
 
 #pragma mark Status
@@ -593,15 +585,13 @@ typedef void *GTLServiceUploadProgressBlock;
 
 #pragma mark Upload
 
-#if NS_BLOCKS_AVAILABLE
-@property (copy) void (^uploadProgressBlock)(GTLServiceTicket *ticket, unsigned long long numberOfBytesRead, unsigned long long dataLength);
-#endif
+@property (copy) GTLServiceUploadProgressBlock uploadProgressBlock;
 
 @end
 
 
 // Category to provide opaque access to tickets stored in fetcher properties
-@interface GTMHTTPFetcher (GTLServiceTicketAdditions)
+@interface GTMBridgeFetcher (GTLServiceTicketAdditions)
 - (id)ticket;
 @end
 

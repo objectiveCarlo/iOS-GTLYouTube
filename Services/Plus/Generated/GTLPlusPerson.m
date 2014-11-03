@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,11 @@
 // Documentation:
 //   https://developers.google.com/+/api/
 // Classes:
-//   GTLPlusPerson (0 custom class methods, 25 custom properties)
+//   GTLPlusPerson (0 custom class methods, 30 custom properties)
+//   GTLPlusPersonAgeRange (0 custom class methods, 2 custom properties)
 //   GTLPlusPersonCover (0 custom class methods, 3 custom properties)
-//   GTLPlusPersonEmailsItem (0 custom class methods, 3 custom properties)
-//   GTLPlusPersonImage (0 custom class methods, 1 custom properties)
+//   GTLPlusPersonEmailsItem (0 custom class methods, 2 custom properties)
+//   GTLPlusPersonImage (0 custom class methods, 2 custom properties)
 //   GTLPlusPersonName (0 custom class methods, 6 custom properties)
 //   GTLPlusPersonOrganizationsItem (0 custom class methods, 9 custom properties)
 //   GTLPlusPersonPlacesLivedItem (0 custom class methods, 2 custom properties)
@@ -45,10 +46,11 @@
 //
 
 @implementation GTLPlusPerson
-@dynamic aboutMe, birthday, circledByCount, cover, currentLocation, displayName,
-         emails, ETag, gender, hasApp, identifier, image, isPlusUser, kind,
-         name, nickname, objectType, organizations, placesLived, plusOneCount,
-         relationshipStatus, tagline, url, urls, verified;
+@dynamic aboutMe, ageRange, birthday, braggingRights, circledByCount, cover,
+         currentLocation, displayName, domain, emails, ETag, gender, identifier,
+         image, isPlusUser, kind, language, name, nickname, objectType,
+         occupation, organizations, placesLived, plusOneCount,
+         relationshipStatus, skills, tagline, url, urls, verified;
 
 + (NSDictionary *)propertyToJSONKeyMap {
   NSDictionary *map =
@@ -79,6 +81,16 @@
 
 // ----------------------------------------------------------------------------
 //
+//   GTLPlusPersonAgeRange
+//
+
+@implementation GTLPlusPersonAgeRange
+@dynamic max, min;
+@end
+
+
+// ----------------------------------------------------------------------------
+//
 //   GTLPlusPersonCover
 //
 
@@ -93,7 +105,7 @@
 //
 
 @implementation GTLPlusPersonEmailsItem
-@dynamic primary, type, value;
+@dynamic type, value;
 @end
 
 
@@ -103,7 +115,7 @@
 //
 
 @implementation GTLPlusPersonImage
-@dynamic url;
+@dynamic isDefault, url;
 @end
 
 
@@ -153,7 +165,7 @@
 //
 
 @implementation GTLPlusPersonUrlsItem
-@dynamic primary, type, value;
+@dynamic label, type, value;
 @end
 
 

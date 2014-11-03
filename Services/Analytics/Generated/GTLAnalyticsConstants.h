@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,25 @@
 
 // Authorization scope
 // View and manage your Google Analytics data
-GTL_EXTERN NSString * const kGTLAuthScopeAnalytics;          // "https://www.googleapis.com/auth/analytics"
+GTL_EXTERN NSString * const kGTLAuthScopeAnalytics;             // "https://www.googleapis.com/auth/analytics"
+// Edit Google Analytics management entities
+GTL_EXTERN NSString * const kGTLAuthScopeAnalyticsEdit;         // "https://www.googleapis.com/auth/analytics.edit"
+// Manage Google Analytics Account users by email address
+GTL_EXTERN NSString * const kGTLAuthScopeAnalyticsManageUsers;  // "https://www.googleapis.com/auth/analytics.manage.users"
+// Create a new Google Analytics account along with its default property and
+// view
+GTL_EXTERN NSString * const kGTLAuthScopeAnalyticsProvision;    // "https://www.googleapis.com/auth/analytics.provision"
 // View your Google Analytics data
-GTL_EXTERN NSString * const kGTLAuthScopeAnalyticsReadonly;  // "https://www.googleapis.com/auth/analytics.readonly"
+GTL_EXTERN NSString * const kGTLAuthScopeAnalyticsReadonly;     // "https://www.googleapis.com/auth/analytics.readonly"
 
-// Type
+// GTLQueryAnalytics - Output
+GTL_EXTERN NSString * const kGTLAnalyticsOutputDataTable;  // "dataTable"
+GTL_EXTERN NSString * const kGTLAnalyticsOutputJson;       // "json"
+
+// GTLQueryAnalytics - SamplingLevel
+GTL_EXTERN NSString * const kGTLAnalyticsSamplingLevelDefault;  // "DEFAULT"
+GTL_EXTERN NSString * const kGTLAnalyticsSamplingLevelFaster;   // "FASTER"
+GTL_EXTERN NSString * const kGTLAnalyticsSamplingLevelHigherPrecision;  // "HIGHER_PRECISION"
+
+// GTLQueryAnalytics - Type
 GTL_EXTERN NSString * const kGTLAnalyticsTypeCost;  // "cost"

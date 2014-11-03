@@ -1,4 +1,4 @@
-/* Copyright (c) 2012 Google Inc.
+/* Copyright (c) 2014 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@
 // ----------------------------------------------------------------------------
 // NOTE: This file is generated from Google APIs Discovery Service.
 // Service:
-//   Cloud Storage API (storage/v1beta1)
+//   Cloud Storage API (storage/v1)
 // Description:
 //   Lets you store and retrieve potentially-large, immutable data objects.
 // Documentation:
 //   https://developers.google.com/storage/docs/json_api/
 // Classes:
-//   GTLStorageBucketAccessControl (0 custom class methods, 9 custom properties)
+//   GTLStorageBucketAccessControl (0 custom class methods, 11 custom properties)
+//   GTLStorageBucketAccessControlProjectTeam (0 custom class methods, 2 custom properties)
 
 #import "GTLStorageBucketAccessControl.h"
 
@@ -36,13 +37,15 @@
 //
 
 @implementation GTLStorageBucketAccessControl
-@dynamic bucket, domain, email, entity, entityId, identifier, kind, role,
-         selfLink;
+@dynamic bucket, domain, email, entity, entityId, ETag, identifier, kind,
+         projectTeam, role, selfLink;
 
 + (NSDictionary *)propertyToJSONKeyMap {
   NSDictionary *map =
-    [NSDictionary dictionaryWithObject:@"id"
-                                forKey:@"identifier"];
+    [NSDictionary dictionaryWithObjectsAndKeys:
+      @"etag", @"ETag",
+      @"id", @"identifier",
+      nil];
   return map;
 }
 
@@ -50,4 +53,14 @@
   [self registerObjectClassForKind:@"storage#bucketAccessControl"];
 }
 
+@end
+
+
+// ----------------------------------------------------------------------------
+//
+//   GTLStorageBucketAccessControlProjectTeam
+//
+
+@implementation GTLStorageBucketAccessControlProjectTeam
+@dynamic projectNumber, team;
 @end

@@ -28,6 +28,7 @@
 - (BOOL)shouldSkipAuthorization;
 - (void)executionDidStop;
 - (NSDictionary *)additionalHTTPHeaders;
+- (NSDictionary *)urlQueryParameters;
 - (GTLUploadParameters *)uploadParameters;
 @end
 
@@ -51,13 +52,7 @@
   NSDictionary *additionalHTTPHeaders_;
   Class expectedObjectClass_;
   BOOL skipAuthorization_;
-#if NS_BLOCKS_AVAILABLE
   void (^completionBlock_)(GTLServiceTicket *ticket, id object, NSError *error);
-#elif !__LP64__
-  // Placeholders: for 32-bit builds, keep the size of the object's ivar section
-  // the same with and without blocks
-  id completionPlaceholder_;
-#endif
 }
 
 // The rpc method name.
@@ -78,7 +73,7 @@
 // or data must be provided.
 @property (copy) GTLUploadParameters *uploadParameters;
 
-// Any url query parameters to add to the query (useful for debugging with some
+// Any URL query parameters to add to the query (useful for debugging with some
 // services).
 @property (copy) NSDictionary *urlQueryParameters;
 
@@ -96,7 +91,6 @@
 // Clients may set this to YES to disallow authorization. Defaults to NO.
 @property (assign) BOOL shouldSkipAuthorization;
 
-#if NS_BLOCKS_AVAILABLE
 // Clients may provide an optional callback block to be called immediately
 // before the executeQuery: callback.
 //
@@ -113,18 +107,17 @@
 //     // the batch execution failed
 //   }
 @property (copy) void (^completionBlock)(GTLServiceTicket *ticket, id object, NSError *error);
-#endif
 
 // methodName is the RPC method name to use.
-+ (id)queryWithMethodName:(NSString *)methodName;
++ (id)queryWithMethodName:(NSString *)methodName GTL_NONNULL((1));
 
 // methodName is the RPC method name to use.
-- (id)initWithMethodName:(NSString *)method;
+- (id)initWithMethodName:(NSString *)method GTL_NONNULL((1));
 
 // If you need to set a parameter that is not listed as a property for a
 // query class, you can do so via this api.  If you need to clear it after
 // setting, pass nil for obj.
-- (void)setCustomParameter:(id)obj forKey:(NSString *)key;
+- (void)setCustomParameter:(id)obj forKey:(NSString *)key GTL_NONNULL((2));
 
 // Auto-generated request IDs
 + (NSString *)nextRequestID;
@@ -132,4 +125,9 @@
 // Methods for subclasses to override.
 + (NSDictionary *)parameterNameMap;
 + (NSDictionary *)arrayPropertyToClassMap;
+@end
+
+// The library doesn't use GTLQueryCollectionImpl, but it provides a concrete implementation
+// of the protocol so the methods do not cause a private method error in Xcode.
+@interface GTLQueryCollectionImpl : GTLQuery <GTLQueryCollectionProtocol>
 @end
