@@ -40,23 +40,23 @@
 @class GTLServiceTicket;
 
 @interface GTLQuery : NSObject <GTLQueryProtocol> {
- @private
-  NSString *methodName_;
-  NSMutableDictionary *json_;
-  GTLObject *bodyObject_;
-  NSMutableDictionary *childCache_;
-  NSString *requestID_;
-  GTLUploadParameters *uploadParameters_;
-  NSDictionary *urlQueryParameters_;
-  NSDictionary *additionalHTTPHeaders_;
-  Class expectedObjectClass_;
-  BOOL skipAuthorization_;
+@private
+    NSString *methodName_;
+    NSMutableDictionary *json_;
+    GTLObject *bodyObject_;
+    NSMutableDictionary *childCache_;
+    NSString *requestID_;
+    GTLUploadParameters *uploadParameters_;
+    NSDictionary *urlQueryParameters_;
+    NSDictionary *additionalHTTPHeaders_;
+    Class expectedObjectClass_;
+    BOOL skipAuthorization_;
 #if NS_BLOCKS_AVAILABLE
-  void (^completionBlock_)(GTLServiceTicket *ticket, id object, NSError *error);
+    void (^completionBlock_)(GTLServiceTicket *ticket, id object, NSError *error);
 #elif !__LP64__
-  // Placeholders: for 32-bit builds, keep the size of the object's ivar section
-  // the same with and without blocks
-  id completionPlaceholder_;
+    // Placeholders: for 32-bit builds, keep the size of the object's ivar section
+    // the same with and without blocks
+    id completionPlaceholder_;
 #endif
 }
 
@@ -132,4 +132,7 @@
 // Methods for subclasses to override.
 + (NSDictionary *)parameterNameMap;
 + (NSDictionary *)arrayPropertyToClassMap;
+@end
+
+@interface GTLQueryCollectionImpl : GTLQuery <GTLQueryCollectionProtocol>
 @end
