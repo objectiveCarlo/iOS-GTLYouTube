@@ -264,4 +264,8 @@ static NSMutableDictionary *gArrayPropertyToClassMapCache = nil;
   return [super resolveInstanceMethod:sel];
 }
 
+@implementation GTLQueryCollectionImpl
+@dynamic pageToken, startIndex;
+@end
+
 @end
