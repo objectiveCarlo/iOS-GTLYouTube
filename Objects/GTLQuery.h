@@ -133,3 +133,6 @@
 + (NSDictionary *)parameterNameMap;
 + (NSDictionary *)arrayPropertyToClassMap;
 @end
+
+@interface GTLQueryCollectionImpl : GTLQuery <GTLQueryCollectionProtocol>
+@end
