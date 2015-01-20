@@ -210,6 +210,10 @@ Pod::Spec.new do |s|
       Utilities/GTLTargetNamespace.h"
     ]
 
+    s.resources = [
+      "OAuth2/Touch/GTMOAuth2ViewTouch.xib"
+    ]
+
 end
 
 
